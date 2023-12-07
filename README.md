@@ -14,7 +14,7 @@ This is a python script which allows you to easily create multiple Minecraft Fab
 ## Usage
 
 ```shell
-python ./fabric-installer.py <name of the installation>
+./fabric-installer.py <name of the installation>
 ```
 It is highly recommended to either use the `-d`|`--directory` argument to change the installation directory.
 
