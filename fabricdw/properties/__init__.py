@@ -1,0 +1,1 @@
+from fabricdw.properties.properties import modify_properties
