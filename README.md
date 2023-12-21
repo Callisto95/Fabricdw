@@ -29,6 +29,20 @@ python -m fabricdw # this can now be anywhere
 
 A shell alias can be created, using the venv python installation: `alias fabricdw="<installation dir>/venv/bin/python -m fabricdw"`.
 
+A more advanced approach would be this function (in your shell's rc file):
+
+```bash
+fabricdw() {
+        if [[ -f "fabricdw" ]]; then
+                ./fabricdw "$*"
+        else
+                <INSTALLATION_DIR>/venv/bin/python -m fabricdw
+        fi
+}
+```
+
+If in a directory with a Fabricdw installation, it uses the installation, otherwise it runs the installation script.
+
 Installing to the global and user directory is possible (via `pip install .` or `pip install --user .` respectively), but this can break system packages.
 
 ### Options
