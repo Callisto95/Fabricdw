@@ -153,19 +153,19 @@ KEEP_BACKUPS="{args.backups}" \\
 SESSION_NAME="{args.name}" \\
 GAME_PORT="{args.port}" \\
 SERVER_START_CMD="{launch_command}" \\
-fabricd $*
+fabricd "$*"
 """
 		)
-		
-		# to run fabridw, it must be executable
-		# give the flag to the file
-		os.chmod(fabric_env_file, os.stat(fabric_env_file).st_mode | stat.S_IEXEC)
-		
-		modify_properties(active_dir, args)
-		
-		print(f"installation '{print_installation_name_str(args.name)}' for {game_version['version']} created! ({active_dir})")
-		
-		return active_dir
+	
+	# to run fabridw, it must be executable
+	# give the flag to the file
+	os.chmod(fabric_env_file, os.stat(fabric_env_file).st_mode | stat.S_IEXEC)
+	
+	modify_properties(active_dir, args)
+	
+	print(f"installation '{print_installation_name_str(args.name)}' for {game_version['version']} created! ({active_dir})")
+	
+	return active_dir
 
 
 def remove_installation(active_installation: dict, fallback_name: str) -> bool:

@@ -63,7 +63,6 @@ Default options are in `[]` after each option.
 
 #### Game
 
-- `-w`|`--world-name`: name of the minecraft world. [`world`]
-- `-s`|`--seed`: the seed for the minecraft world. [random seed]
-- `-df`|`--difficulty`: the difficulty for the server. [`defaults.difficulty` or `normal`]
-- `-gm`|`--gamemode`: the game mode (e.g. survival, creative) for the server. [`defaults.gamemode` or `survival`]
+Any property in the `server.properties` file can be changed with the `-property` argument. Just like the properties file, the argument also uses the `<KEY>=<VALUE>` syntax (e.g. `-property difficulty=hard`).
+
+See the [Minecraft Wiki](https://minecraft.wiki/w/Server.properties#Default_content) for reference.

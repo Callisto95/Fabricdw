@@ -1,7 +1,7 @@
 import getpass
 import json
-import os.path
 import os
+import os.path
 import subprocess
 from argparse import ArgumentParser, Namespace
 
@@ -29,15 +29,9 @@ def parse_args(defaults: dict) -> Namespace:
 	
 	parser.add_argument("--show-init-output", action="store_const", dest="init_output", default=subprocess.DEVNULL, const=None)
 	
-	parser.add_argument("-w", "--world-name", action="store", type=str, dest="world_name", default="world")
-	parser.add_argument("-s", "--seed", action="store", type=int, dest="seed", default=None)
-	parser.add_argument("-df", "--difficulty", action="store", type=str, dest="difficulty", default=defaults['difficulty'], choices=["peaceful", "easy", "normal", "hard"])
-	parser.add_argument("-gm", "--gamemode", action="store", type=str, dest="game_mode", default=defaults['gamemode'], choices=["survival", "adventure", "creative", "spectator"])
+	parser.add_argument("-property", action="append", type=str, dest="properties", default=[])
 	
 	args: Namespace = parser.parse_args()
-	
-	if args.seed is None:
-		args.seed = ""
 	
 	return args
 
@@ -47,6 +41,7 @@ def main() -> None:
 		with open(CONFIG_FILE, 'r') as cfg:
 			config = json.load(cfg)
 	else:
+		print("config file missing, creating new")
 		config = {
 			"defaults": {
 				"min_ram": 0.5,
