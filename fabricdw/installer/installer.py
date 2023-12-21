@@ -144,7 +144,7 @@ def create_installation(active_installation: dict, args: Namespace) -> str | Non
 		launch_script_file.write(
 			f"""#!/bin/sh
 GAME_USER="{args.user}" \\
-IDLE_SERVER="{convert_bool(args.idle_time == 0)}" \\
+IDLE_SERVER="{convert_bool(args.idle_time != 0)}" \\
 IDLE_IF_TIME="{1200 if args.idle_time == 0 else args.idle_time}" \\
 SERVER_ROOT="{active_dir}" \\
 BACKUP_DEST="{active_dir}/backup" \\
