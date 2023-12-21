@@ -14,37 +14,22 @@ This is a python script which allows you to easily create multiple Minecraft Fab
 
 ## Installation
 
-### Local Installation
-
-This means you have to be in the directory and have activated the venv. 
-
 ```shell
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Installing, then adding the site package folder to the `PYTHONPATH` environment variable acts like the global installation, without being one.
-
-Example for `PYTHONPATH`: `PYTHONPATH=$HOME/Fabricdw/venv/lib/python3.11/site-packaes:$PYTHONPATH`. (This can be done in `environment.d` or in the rc file of you shell).
-
-### Global installation
-
-This is not possible on up-to-date Linux distibutions, as the global installation is marked as `EXTERNALLY-MANAGED`.
+## Running Fabricdw
 
 ```shell
-python -m pip install ./fabricdw
+source venv/bin/activate # you must be in the virtual environment
+python -m fabricdw # this can now be anywhere
 ```
 
-## Usage
+A shell alias can be created, using the venv python installation: `alias fabricdw="<installation dir>/venv/bin/python -m fabricdw"`.
 
-```shell
-python -m fabricdw <name of the installation>
-```
-It is highly recommended to either use the `-d`|`--directory` argument to change the installation directory.
-
-After an installation is created, a `fabricdw` file is created in the installation directory.
-This file passes the required environment variables to `fabricd`. Any arguments are passed to `fabricd`.
+Installing to the global and user directory is possible (via `pip install .` or `pip install --user .` respectively), but this can break system packages.
 
 ### Options
 
