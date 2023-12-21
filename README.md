@@ -9,7 +9,32 @@ This is a python script which allows you to easily create multiple Minecraft Fab
 `fabricdw` requires `fabricd`, which is the [minecraft-server](https://github.com/Edenhofer/minecraft-server/) script installed with `GAME=fabric` and `INAME=fabricd`.
 
 ## Note for `fabricd`
+
 `fabricd`, also comes with the AUR package [fabric-server](https://aur.archlinux.org/packages/fabric-server).
+
+## Installation
+
+### Local Installation
+
+This means you have to be in the directory and have activated the venv. 
+
+```shell
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Installing, then adding the site package folder to the `PYTHONPATH` environment variable acts like the global installation, without being one.
+
+Example for `PYTHONPATH`: `PYTHONPATH=$HOME/Fabricdw/venv/lib/python3.11/site-packaes:$PYTHONPATH`. (This can be done in `environment.d` or in the rc file of you shell).
+
+### Global installation
+
+This is not possible on up-to-date Linux distibutions, as the global installation is marked as `EXTERNALLY-MANAGED`.
+
+```shell
+python -m pip install ./fabricdw
+```
 
 ## Usage
 
