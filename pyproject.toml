@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "fabricdw"
+version = "1.0.0"
+description = "fabricd wrapper"
+authors = ["UnknownUser"]
+license = "GPLv3.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+pick = "^2.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
