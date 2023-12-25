@@ -4,11 +4,18 @@ import os
 import os.path
 import subprocess
 from argparse import ArgumentParser, Namespace
+from typing import Any
 
 from fabricdw.installer import remove_installation
 from fabricdw.installer.installer import create_installation
+from fabricdw.properties import create_replacements
 
 CONFIG_FILE: str = os.path.expanduser("~/.config/fabricdw.json")
+
+
+def set_if_not_defined(args: Namespace, prop_name: str, fallback: Any) -> None:
+	if prop_name not in args.properties:
+		args.properties[prop_name] = fallback
 
 
 def parse_args(defaults: dict) -> Namespace:
@@ -33,6 +40,16 @@ def parse_args(defaults: dict) -> Namespace:
 	
 	args: Namespace = parser.parse_args()
 	
+	args.properties = create_replacements(args)
+	
+	# required by the installer
+	set_if_not_defined(args, "level-name", "world")
+	set_if_not_defined(args, "server-port", 25565)
+	
+	# query port should be server port, if not set explicitly
+	if args.properties["server-port"] != 25565 and "query.port" not in args.properties:
+		args.properties["query.port"] = args.properties["server-port"]
+	
 	return args
 
 
@@ -47,8 +64,6 @@ def main() -> None:
 				"min_ram": 0.5,
 				"max_ram": 6,
 				"idle_time": 0,
-				"gamemode": "survival",
-				"difficulty": "normal",
 				"backups": 5,
 			},
 			'installations': []

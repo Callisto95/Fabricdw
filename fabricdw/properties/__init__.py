@@ -1,1 +1,1 @@
-from fabricdw.properties.properties import modify_properties
+from fabricdw.properties.properties import modify_properties, create_replacements

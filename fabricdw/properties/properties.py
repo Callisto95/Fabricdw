@@ -2,7 +2,7 @@ from argparse import Namespace
 from colorama import Fore, Style
 
 
-def modify_properties(active_dir: str, args: Namespace) -> None:
+def create_replacements(args: Namespace) -> dict[str, str]:
 	replacements: dict[str, str] = {}
 	
 	for property_ in args.properties:
@@ -14,6 +14,10 @@ def modify_properties(active_dir: str, args: Namespace) -> None:
 		
 		replacements[contents[0]] = contents[1]
 	
+	return replacements
+
+
+def modify_properties(active_dir: str, replacements: dict[str, str]) -> None:
 	print("modifying server.properties...")
 	
 	properties_file: str = f"{active_dir}/server.properties"
@@ -31,7 +35,7 @@ def modify_properties(active_dir: str, args: Namespace) -> None:
 			if key not in replacements:
 				continue
 			
-			lines[index] = f"{key}={replacements.pop(key)}\n"
+			lines[index] = f"{key}={replacements.pop(key)}"
 	
 	if len(replacements) != 0:
 		print(f"{Fore.YELLOW}some properties have not been used:{Style.RESET_ALL}")
@@ -39,4 +43,4 @@ def modify_properties(active_dir: str, args: Namespace) -> None:
 			print(f"\t{key} ({value})")
 	
 	with open(properties_file, "w") as properties:
-		properties.writelines(lines)
+		properties.writelines([f"{line}\n" for line in lines])

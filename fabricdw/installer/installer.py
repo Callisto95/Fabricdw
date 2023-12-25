@@ -138,7 +138,8 @@ def create_installation(active_installation: dict, args: Namespace) -> str | Non
 	subprocess.call(["java", "-jar", jar_file], cwd=active_dir, stdout=args.init_output)
 	
 	launch_command = LAUNCH_COMMAND.format(min_ram=int(args.min_ram * 1024), max_ram=int(args.max_ram * 1024))
-	world_name = args.world_name
+	world_name = args.properties["level-name"]
+	port = args.properties["server-port"]
 	
 	with open(fabric_env_file, 'w') as launch_script_file:
 		launch_script_file.write(
@@ -151,17 +152,17 @@ BACKUP_DEST="{active_dir}/backup" \\
 BACKUP_PATHS="{world_name} {world_name}_nether {world_name}_the_end" \\
 KEEP_BACKUPS="{args.backups}" \\
 SESSION_NAME="{args.name}" \\
-GAME_PORT="{args.port}" \\
+GAME_PORT="{port}" \\
 SERVER_START_CMD="{launch_command}" \\
 fabricd "$*"
 """
 		)
 	
 	# to run fabridw, it must be executable
-	# give the flag to the file
+	# give the EXEC flag to the file
 	os.chmod(fabric_env_file, os.stat(fabric_env_file).st_mode | stat.S_IEXEC)
 	
-	modify_properties(active_dir, args)
+	modify_properties(active_dir, args.properties)
 	
 	print(f"installation '{print_installation_name_str(args.name)}' for {game_version['version']} created! ({active_dir})")
 	

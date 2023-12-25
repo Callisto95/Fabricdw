@@ -56,7 +56,6 @@ Default options are in `[]` after each option.
 - `-u`|`--user`: the user running the server. [current user]
 - `-mn`|`--min-ram`: minimum amount of RAM the server can use (in GB). [`defaults.min_ram` or `0.5`]
 - `-mx`|`--max-ram`: maximum amount of RAM the server can use (in GB). [`defaults.max_ram` or `6`]
-- `-p`|`--port`: the port the server will use. [`25565`]
 - `-b`|`--backups`: the amount of backups to keep. [`defaults.backups` or `5`]
 - `-i`|`--idle-time`: the amount of seconds after which the server is counted as "idle". `0` to disable the server going idle. [`defaults.idle_time` or `0`]
 - `--show-init-output`: show the output of the initialization. [no output]
