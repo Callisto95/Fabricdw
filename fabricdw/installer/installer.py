@@ -118,6 +118,14 @@ def create_installation(active_installation: dict, args: Namespace) -> str | Non
 	os.makedirs(args.output_dir, exist_ok=True)
 	active_dir: str = os.path.abspath(args.output_dir)
 	
+	try:
+		return _create_installation(active_dir, args)
+	except KeyboardInterrupt as kbe:
+		remove_dir(active_dir)
+		raise kbe
+
+
+def _create_installation(active_dir: str, args: Namespace) -> str | None:
 	if len(os.listdir(active_dir)) > 0 and not yes_no_question(f"The directory '{active_dir}' is not empty. Proceed anyway?"):
 		print("cancelling installation")
 		return None
@@ -144,18 +152,18 @@ def create_installation(active_installation: dict, args: Namespace) -> str | Non
 	with open(fabric_env_file, 'w') as launch_script_file:
 		launch_script_file.write(
 			f"""#!/bin/sh
-GAME_USER="{args.user}" \\
-IDLE_SERVER="{convert_bool(args.idle_time != 0)}" \\
-IDLE_IF_TIME="{1200 if args.idle_time == 0 else args.idle_time}" \\
-SERVER_ROOT="{active_dir}" \\
-BACKUP_DEST="{active_dir}/backup" \\
-BACKUP_PATHS="{world_name} {world_name}_nether {world_name}_the_end" \\
-KEEP_BACKUPS="{args.backups}" \\
-SESSION_NAME="{args.name}" \\
-GAME_PORT="{port}" \\
-SERVER_START_CMD="{launch_command}" \\
-fabricd "$*"
-"""
+	GAME_USER="{args.user}" \\
+	IDLE_SERVER="{convert_bool(args.idle_time != 0)}" \\
+	IDLE_IF_TIME="{1200 if args.idle_time == 0 else args.idle_time}" \\
+	SERVER_ROOT="{active_dir}" \\
+	BACKUP_DEST="{active_dir}/backup" \\
+	BACKUP_PATHS="{world_name} {world_name}_nether {world_name}_the_end" \\
+	KEEP_BACKUPS="{args.backups}" \\
+	SESSION_NAME="{args.name}" \\
+	GAME_PORT="{port}" \\
+	SERVER_START_CMD="{launch_command}" \\
+	fabricd "$*"
+	"""
 		)
 	
 	# to run fabridw, it must be executable
@@ -178,9 +186,13 @@ def remove_installation(active_installation: dict, fallback_name: str) -> bool:
 		print(f"installation '{print_installation_name(active_installation)}' does not exist anymore.")
 		return True
 	elif yes_no_question(f"Remove installation '{active_installation['name']}' ({active_installation['root']})?\nThis will delete all files!"):
-		shutil.rmtree(active_installation['root'])
+		remove_dir(active_installation['root'])
 		print(f"installation '{print_installation_name(active_installation)}' ({active_installation['root']}) deleted!")
 		return True
 	
 	print("nothing deleted")
 	return False
+
+
+def remove_dir(directory: str) -> None:
+	shutil.rmtree(directory)
