@@ -34,9 +34,9 @@ A more advanced approach would be this function (in your shell's rc file):
 ```bash
 fabricdw() {
         if [[ -f "fabricdw" ]]; then
-                ./fabricdw "$*"
+                ./fabricdw $*
         else
-                <INSTALLATION_DIR>/venv/bin/python -m fabricdw
+                <INSTALLATION_DIR>/venv/bin/python -m fabricdw $*
         fi
 }
 ```
