@@ -24,7 +24,7 @@ pip install -r requirements.txt
 
 ```shell
 source venv/bin/activate # you must be in the virtual environment
-python -m fabricdw # this can now be anywhere
+python -m fabricdw <installation name> # this can now be anywhere
 ```
 
 A shell alias can be created, using the venv python installation: `alias fabricdw="<installation dir>/venv/bin/python -m fabricdw"`.
@@ -51,7 +51,7 @@ Default options are in `[]` after each option.
 
 #### Server
 
-- `-d`|`--directory`: path of the installation. [current directory]
+- `-d`|`--directory`: path of the installation. [`<current directory>/<installation name>`]
 - `-r`|`--remove`: remove the installation (you're asked before any files are removed)
 - `-u`|`--user`: the user running the server. [current user]
 - `-mn`|`--min-ram`: minimum amount of RAM the server can use (in GB). [`defaults.min_ram` or `0.5`]

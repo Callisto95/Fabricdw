@@ -23,7 +23,7 @@ def parse_args(defaults: dict) -> Namespace:
 	
 	parser.add_argument("name", action="store", type=str, help="name of the installation")
 	
-	parser.add_argument("-d", "--directory", action="store", type=str, dest="output_dir", default=".")
+	parser.add_argument("-d", "--directory", action="store", type=str, dest="output_dir", default=None)
 	parser.add_argument("-r", "--remove", action="store_true", dest="remove")
 	parser.add_argument("-u", "--user", action="store", type=str, dest="user", default=getpass.getuser())
 	
@@ -49,6 +49,10 @@ def parse_args(defaults: dict) -> Namespace:
 	# query port should be server port, if not set explicitly
 	if args.properties["server-port"] != 25565 and "query.port" not in args.properties:
 		args.properties["query.port"] = args.properties["server-port"]
+	
+	# do not use the current dir
+	if args.output_dir is None:
+		args.output_dir = f"./{args.name}"
 	
 	return args
 

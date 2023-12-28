@@ -121,6 +121,7 @@ def create_installation(active_installation: dict, args: Namespace) -> str | Non
 	try:
 		return _create_installation(active_dir, args)
 	except KeyboardInterrupt as kbe:
+		print("Keyboard interrupt: Cleaning up...")
 		remove_dir(active_dir)
 		raise kbe
 
