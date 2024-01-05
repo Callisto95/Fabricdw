@@ -11,7 +11,10 @@ from colorama import Fore, Style
 from pick import pick
 
 from fabricdw import convert_bool
+from fabricdw.common import Installation, CONFIG, remove_dir, absolute_path, okay_to_write_into
+from fabricdw.common.properties import Properties, Defaults
 from fabricdw.properties import modify_properties
+from fabricdw.properties.modify import get_properties
 
 SERVER_JAR_FILE: str = "fabric-server-launch.jar"
 LAUNCH_COMMAND: str = "java -Dlog4j2.formatMsgNoLookups=true -Xms{min_ram}M -Xmx{max_ram}M -jar ./fabric-server-launch.jar nogui"
@@ -58,25 +61,6 @@ def custom_version_selection(game_versions: list[dict], loader_versions: list[di
 	return game_versions[game_index], loader_versions[loader_index], installer_versions[installer_index]
 
 
-def print_installation_name(installation: dict, after: Fore = None) -> str:
-	return print_installation_name_str(installation['name'], after=after)
-
-
-def print_installation_name_str(installation_name: str, after: Fore = None) -> str:
-	return f"{Fore.CYAN}{installation_name}{Style.RESET_ALL}{after if after else ''}"
-
-
-def yes_no_question(question: str, yes_first: bool = False) -> bool:
-	options = ["No", "Yes"]
-	
-	if yes_first:
-		options = options[::-1]
-	
-	_, index = pick(options, question, indicator=">")
-	
-	return index == 1
-
-
 def select_version() -> tuple[dict, dict, dict]:
 	print("getting latest versions...")
 	
@@ -110,41 +94,46 @@ def select_version() -> tuple[dict, dict, dict]:
 			return custom_version_selection(game_versions, loader_versions, installer_versions)
 
 
-def create_installation(active_installation: dict, args: Namespace) -> str | None:
+def create_installation(active_installation: Installation, args: Namespace) -> str | None:
 	if active_installation is not None:
-		print(f"{Fore.RED}installation '{print_installation_name(active_installation, after=Fore.RED)}' already exists! ({active_installation['root']}){Style.RESET_ALL}")
+		print(f"{Fore.RED}installation '{active_installation.pretty_name(Fore.RED)}' already exists! ({active_installation.root}){Style.RESET_ALL}")
 		return None
 	
 	os.makedirs(args.output_dir, exist_ok=True)
-	active_dir: str = os.path.abspath(args.output_dir)
+	active_dir: str = absolute_path(args.output_dir)
 	
 	try:
-		return _create_installation(active_dir, args)
+		_dir = _create_installation(active_dir, args)
+		
+		print(f"installation '{Installation.pretty_name_str(args.name)}' created! ({active_dir})")
+		
+		return _dir
 	except KeyboardInterrupt as kbe:
 		print("Keyboard interrupt: Cleaning up...")
 		remove_dir(active_dir)
 		raise kbe
 
 
-def _create_installation(active_dir: str, args: Namespace) -> str | None:
-	if len(os.listdir(active_dir)) > 0 and not yes_no_question(f"The directory '{active_dir}' is not empty. Proceed anyway?"):
-		print("cancelling installation")
-		return None
+def _create_installation(active_dir: str, args: Namespace, init_server: bool = True, filled_ok: bool = False) -> str | None:
+	if not filled_ok and not okay_to_write_into:
+		return
 	
-	game_version, loader_version, installer_version = select_version()
-	server_url = build_server_jar_url(game_version, loader_version, installer_version)
-	
-	server_jar = requests.get(server_url)
-	
-	jar_file = f"{active_dir}/{SERVER_JAR_FILE}"
 	fabric_env_file = f"{active_dir}/{FABRIC_ENV_FILE}"
 	
-	with open(jar_file, "wb") as jar:
-		jar.write(server_jar.content)
-	
-	print("initializing the server...")
-	print(f"{Fore.RED}{Style.BRIGHT}This should not actually start the server!{Style.RESET_ALL}")
-	subprocess.call(["java", "-jar", jar_file], cwd=active_dir, stdout=args.init_output)
+	if init_server:
+		game_version, loader_version, installer_version = select_version()
+		server_url = build_server_jar_url(game_version, loader_version, installer_version)
+		
+		server_jar = requests.get(server_url)
+		
+		jar_file = f"{active_dir}/{SERVER_JAR_FILE}"
+		
+		with open(jar_file, "wb") as jar:
+			jar.write(server_jar.content)
+		
+		print("initializing the server...")
+		print(f"{Fore.RED}{Style.BRIGHT}This should not actually start the server!{Style.RESET_ALL}")
+		subprocess.call(["java", "-jar", jar_file], cwd=active_dir, stdout=args.init_output)
 	
 	launch_command = LAUNCH_COMMAND.format(min_ram=int(args.min_ram * 1024), max_ram=int(args.max_ram * 1024))
 	world_name = args.properties["level-name"]
@@ -153,47 +142,75 @@ def _create_installation(active_dir: str, args: Namespace) -> str | None:
 	with open(fabric_env_file, 'w') as launch_script_file:
 		launch_script_file.write(
 			f"""#!/bin/sh
-	GAME_USER="{args.user}" \\
-	IDLE_SERVER="{convert_bool(args.idle_time != 0)}" \\
-	IDLE_IF_TIME="{1200 if args.idle_time == 0 else args.idle_time}" \\
-	SERVER_ROOT="{active_dir}" \\
-	BACKUP_DEST="{active_dir}/backup" \\
-	BACKUP_PATHS="{world_name} {world_name}_nether {world_name}_the_end" \\
-	KEEP_BACKUPS="{args.backups}" \\
-	SESSION_NAME="{args.name}" \\
-	GAME_PORT="{port}" \\
-	SERVER_START_CMD="{launch_command}" \\
-	fabricd "$*"
+GAME_USER="{args.user}" \\
+IDLE_SERVER="{convert_bool(args.idle_time != 0)}" \\
+IDLE_IF_TIME="{1200 if args.idle_time == 0 else args.idle_time}" \\
+SERVER_ROOT="{active_dir}" \\
+BACKUP_DEST="{active_dir}/backup" \\
+BACKUP_PATHS="{world_name} {world_name}_nether {world_name}_the_end" \\
+KEEP_BACKUPS="{args.backups}" \\
+SESSION_NAME="{args.name}" \\
+GAME_PORT="{port}" \\
+SERVER_START_CMD="{launch_command}" \\
+fabricd "$*"
 	"""
 		)
 	
-	# to run fabridw, it must be executable
+	# to run fabricdw, it must be executable
 	# give the EXEC flag to the file
 	os.chmod(fabric_env_file, os.stat(fabric_env_file).st_mode | stat.S_IEXEC)
 	
 	modify_properties(active_dir, args.properties)
 	
-	print(f"installation '{print_installation_name_str(args.name)}' for {game_version['version']} created! ({active_dir})")
-	
 	return active_dir
 
 
-def remove_installation(active_installation: dict, fallback_name: str) -> bool:
-	if active_installation is None:
-		print(f"{Fore.RED}installation '{print_installation_name_str(fallback_name, after=Fore.RED)}' does not exist!{Style.RESET_ALL}")
-		return False
+def _copy_installation(args: Namespace, source_installation: Installation, destination: str) -> str | None:
+	shutil.copytree(source_installation.root, destination, dirs_exist_ok=True)
 	
-	if not os.path.exists(active_installation['root']) or not os.path.isdir(active_installation['root']):
-		print(f"installation '{print_installation_name(active_installation)}' does not exist anymore.")
-		return True
-	elif yes_no_question(f"Remove installation '{active_installation['name']}' ({active_installation['root']})?\nThis will delete all files!"):
-		remove_dir(active_installation['root'])
-		print(f"installation '{print_installation_name(active_installation)}' ({active_installation['root']}) deleted!")
-		return True
+	world_name, port, qport = get_properties(f"{destination}/server.properties", Properties.WORLD_NAME, Properties.PORT_SERVER, Properties.PORT_QUERY)
 	
-	print("nothing deleted")
-	return False
+	"""
+	give a warning if:
+	the copied value is the default
+	AND
+	the given value is the default
+	"""
+	
+	# all are guaranteed to be in args.properties
+	if world_name == Defaults.WORLD_NAME and args.properties[Properties.WORLD_NAME] != Defaults.WORLD_NAME:
+		args.properties[Properties.WORLD_NAME] = world_name
+	
+	if port == Defaults.PORT_SERVER and args.properties[Properties.PORT_SERVER] != Defaults.PORT_SERVER:
+		args.properties[Properties.PORT_SERVER] = port
+	else:
+		print(f"{Fore.YELLOW}The server port of {Installation.pretty_name_str(args.name, after=Fore.YELLOW)} is the same as {Installation.pretty_name_str(args.copy, after=Fore.YELLOW)}!{Style.RESET_ALL}")
+	
+	if qport == Defaults.PORT_QUERY and Properties.PORT_QUERY in args.properties and args.properties[Properties.PORT_QUERY] != Defaults.PORT_QUERY:
+		args.properties[Properties.PORT_QUERY] = qport
+	else:
+		print(f"{Fore.YELLOW}The query port of {Installation.pretty_name_str(args.name, after=Fore.YELLOW)} is the same as {Installation.pretty_name_str(args.copy, after=Fore.YELLOW)}!{Style.RESET_ALL}")
+	
+	_dir = _create_installation(destination, args, init_server=False, filled_ok=True)
+	
+	return _dir
 
 
-def remove_dir(directory: str) -> None:
-	shutil.rmtree(directory)
+def copy_installation(args: Namespace) -> str | None:
+	source_installation: Installation | None = CONFIG.get_installation(args.copy)
+	destination: str = absolute_path(args.output_dir)
+	
+	if source_installation is None:
+		print("No installation to copy!")
+		return None
+	
+	try:
+		_dir = _copy_installation(args, source_installation, destination)
+		
+		print(f"Installation {Installation.pretty_name_str(args.copy)} copied to {Installation.pretty_name_str(args.name)} ({args.output_dir})")
+		
+		return _dir
+	except KeyboardInterrupt as kbe:
+		print("Keyboard interrupt! Cleaning up!")
+		remove_dir(args.output_dir)
+		raise kbe
