@@ -181,14 +181,10 @@ def _copy_installation(args: Namespace, source_installation: Installation, desti
 	if world_name == Defaults.WORLD_NAME and args.properties[Properties.WORLD_NAME] != Defaults.WORLD_NAME:
 		args.properties[Properties.WORLD_NAME] = world_name
 	
-	if port == Defaults.PORT_SERVER and args.properties[Properties.PORT_SERVER] != Defaults.PORT_SERVER:
-		args.properties[Properties.PORT_SERVER] = port
-	else:
+	if port == Defaults.PORT_SERVER and args.properties[Properties.PORT_SERVER] == Defaults.PORT_SERVER:
 		print(f"{Fore.YELLOW}The server port of {Installation.pretty_name_str(args.name, after=Fore.YELLOW)} is the same as {Installation.pretty_name_str(args.copy, after=Fore.YELLOW)}!{Style.RESET_ALL}")
 	
-	if qport == Defaults.PORT_QUERY and Properties.PORT_QUERY in args.properties and args.properties[Properties.PORT_QUERY] != Defaults.PORT_QUERY:
-		args.properties[Properties.PORT_QUERY] = qport
-	else:
+	if qport == Defaults.PORT_QUERY and Properties.PORT_QUERY in args.properties and args.properties[Properties.PORT_QUERY] == Defaults.PORT_QUERY:
 		print(f"{Fore.YELLOW}The query port of {Installation.pretty_name_str(args.name, after=Fore.YELLOW)} is the same as {Installation.pretty_name_str(args.copy, after=Fore.YELLOW)}!{Style.RESET_ALL}")
 	
 	_dir = _create_installation(destination, args, init_server=False, filled_ok=True)
