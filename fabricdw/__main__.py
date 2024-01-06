@@ -11,11 +11,6 @@ from fabricdw.installations.create import create_installation
 from fabricdw.properties import create_replacements
 
 
-def set_if_not_defined(args: Namespace, prop_name: str, fallback: str) -> None:
-	if prop_name not in args.properties:
-		args.properties[prop_name] = fallback
-
-
 def parse_args() -> Namespace:
 	defaults: fabricdw.common.config.Defaults = CONFIG.defaults
 	
@@ -44,10 +39,6 @@ def parse_args() -> Namespace:
 	args: Namespace = parser.parse_args()
 	
 	args.properties = create_replacements(args)
-	
-	# required by fabricd, so it must be set
-	set_if_not_defined(args, Properties.WORLD_NAME, Defaults.WORLD_NAME)
-	set_if_not_defined(args, Properties.PORT_SERVER, Defaults.PORT_SERVER)
 	
 	# if not given, use current dir + name
 	args.output_dir = absolute_path(args.output_dir if args.output_dir is not None else f"./{args.name}")

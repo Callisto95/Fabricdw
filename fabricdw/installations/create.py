@@ -5,6 +5,7 @@ import stat
 import subprocess
 from argparse import Namespace
 from enum import StrEnum
+from os.path import exists
 
 import requests
 from colorama import Fore, Style
@@ -94,6 +95,11 @@ def select_version() -> tuple[dict, dict, dict]:
 			return custom_version_selection(game_versions, loader_versions, installer_versions)
 
 
+def set_property_if_not_defined(args: Namespace, prop_name: str, fallback: str) -> None:
+	if prop_name not in args.properties:
+		args.properties[prop_name] = fallback
+
+
 def create_installation(active_installation: Installation, args: Namespace) -> str | None:
 	if active_installation is not None:
 		print(f"{Fore.RED}installation '{active_installation.pretty_name(Fore.RED)}' already exists! ({active_installation.root}){Style.RESET_ALL}")
@@ -101,6 +107,10 @@ def create_installation(active_installation: Installation, args: Namespace) -> s
 	
 	os.makedirs(args.output_dir, exist_ok=True)
 	active_dir: str = absolute_path(args.output_dir)
+	
+	# required by the installer
+	set_property_if_not_defined(args, Properties.WORLD_NAME, Defaults.WORLD_NAME)
+	set_property_if_not_defined(args, Properties.PORT_SERVER, Defaults.PORT_SERVER)
 	
 	try:
 		_dir = _create_installation(active_dir, args)
@@ -116,7 +126,7 @@ def create_installation(active_installation: Installation, args: Namespace) -> s
 
 def _create_installation(active_dir: str, args: Namespace, init_server: bool = True, filled_ok: bool = False) -> str | None:
 	if not filled_ok and not okay_to_write_into:
-		return
+		return None
 	
 	fabric_env_file = f"{active_dir}/{FABRIC_ENV_FILE}"
 	
@@ -136,8 +146,8 @@ def _create_installation(active_dir: str, args: Namespace, init_server: bool = T
 		subprocess.call(["java", "-jar", jar_file], cwd=active_dir, stdout=args.init_output)
 	
 	launch_command = LAUNCH_COMMAND.format(min_ram=int(args.min_ram * 1024), max_ram=int(args.max_ram * 1024))
-	world_name = args.properties["level-name"]
-	port = args.properties["server-port"]
+	world_name = args.properties[Properties.WORLD_NAME]
+	port = args.properties[Properties.PORT_SERVER]
 	
 	with open(fabric_env_file, 'w') as launch_script_file:
 		launch_script_file.write(
@@ -152,7 +162,7 @@ KEEP_BACKUPS="{args.backups}" \\
 SESSION_NAME="{args.name}" \\
 GAME_PORT="{port}" \\
 SERVER_START_CMD="{launch_command}" \\
-fabricd "$*"
+fabricd $*
 	"""
 		)
 	
@@ -170,21 +180,25 @@ def _copy_installation(args: Namespace, source_installation: Installation, desti
 	
 	world_name, port, qport = get_properties(f"{destination}/server.properties", Properties.WORLD_NAME, Properties.PORT_SERVER, Properties.PORT_QUERY)
 	
-	"""
-	give a warning if:
-	the copied value is the default
-	AND
-	the given value is the default
-	"""
+	if args.properties[Properties.WORLD_NAME] != world_name:
+		target_world_name = args.properties[Properties.WORLD_NAME]
+		
+		shutil.move(f"{destination}/{world_name}", f"{destination}/{target_world_name}")
+		
+		nether = f"{destination}/{world_name}_nether"
+		the_end = f"{destination}/{world_name}_the_end"
+		
+		# some servers move standard dimensions out of the <WORLD NAME> folder
+		# end is DIM1, nether is DIM-1 in regular folder
+		if exists(nether):
+			shutil.move(nether, f"{destination}/{target_world_name}_nether")
+		if exists(the_end):
+			shutil.move(the_end, f"{destination}/{target_world_name}_the_end")
 	
-	# all are guaranteed to be in args.properties
-	if world_name == Defaults.WORLD_NAME and args.properties[Properties.WORLD_NAME] != Defaults.WORLD_NAME:
-		args.properties[Properties.WORLD_NAME] = world_name
-	
-	if port == Defaults.PORT_SERVER and args.properties[Properties.PORT_SERVER] == Defaults.PORT_SERVER:
+	if args.properties[Properties.PORT_SERVER] == port:
 		print(f"{Fore.YELLOW}The server port of {Installation.pretty_name_str(args.name, after=Fore.YELLOW)} is the same as {Installation.pretty_name_str(args.copy, after=Fore.YELLOW)}!{Style.RESET_ALL}")
 	
-	if qport == Defaults.PORT_QUERY and Properties.PORT_QUERY in args.properties and args.properties[Properties.PORT_QUERY] == Defaults.PORT_QUERY:
+	if args.properties[Properties.PORT_QUERY] == qport:
 		print(f"{Fore.YELLOW}The query port of {Installation.pretty_name_str(args.name, after=Fore.YELLOW)} is the same as {Installation.pretty_name_str(args.copy, after=Fore.YELLOW)}!{Style.RESET_ALL}")
 	
 	_dir = _create_installation(destination, args, init_server=False, filled_ok=True)
@@ -195,6 +209,16 @@ def _copy_installation(args: Namespace, source_installation: Installation, desti
 def copy_installation(args: Namespace) -> str | None:
 	source_installation: Installation | None = CONFIG.get_installation(args.copy)
 	destination: str = absolute_path(args.output_dir)
+	
+	os.makedirs(destination)
+	
+	if not okay_to_write_into(destination):
+		return None
+	
+	set_property_if_not_defined(args, Properties.WORLD_NAME, Defaults.WORLD_NAME)
+	set_property_if_not_defined(args, Properties.PORT_SERVER, Defaults.PORT_SERVER)
+	# keep the regular server port
+	set_property_if_not_defined(args, Properties.PORT_QUERY, args.properties[Properties.PORT_SERVER])
 	
 	if source_installation is None:
 		print("No installation to copy!")
