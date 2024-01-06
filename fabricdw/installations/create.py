@@ -12,7 +12,7 @@ from colorama import Fore, Style
 from pick import pick
 
 from fabricdw import convert_bool
-from fabricdw.common import Installation, CONFIG, remove_dir, absolute_path, okay_to_write_into
+from fabricdw.common import Installation, CONFIG, remove_dir, absolute_path, okay_to_write_into, yes_no_question
 from fabricdw.common.properties import Properties, Defaults
 from fabricdw.properties import modify_properties
 from fabricdw.properties.modify import get_properties
@@ -179,6 +179,10 @@ def _copy_installation(args: Namespace, source_installation: Installation, desti
 	shutil.copytree(source_installation.root, destination, dirs_exist_ok=True)
 	
 	world_name, port, qport = get_properties(f"{destination}/server.properties", Properties.WORLD_NAME, Properties.PORT_SERVER, Properties.PORT_QUERY)
+	
+	lock_file = f"{destination}/{world_name}/session.lock"
+	if exists(lock_file) and yes_no_question("Session lock file exists! Remove it?", yes_first=True):
+		os.remove(lock_file)
 	
 	if args.properties[Properties.WORLD_NAME] != world_name:
 		target_world_name = args.properties[Properties.WORLD_NAME]
