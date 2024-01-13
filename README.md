@@ -27,7 +27,7 @@ source venv/bin/activate # you must be in the virtual environment
 python -m fabricdw <installation name> # this can now be anywhere
 ```
 
-A shell alias can be created, using the venv python installation: `alias fabricdw="<installation dir>/venv/bin/python -m fabricdw"`.
+A shell alias can be created, using the venv python installation: `alias fabricdw="<INSTALLATION_DIR>/venv/bin/python -m fabricdw"`.
 
 A more advanced approach would be this function (in your shell's rc file):
 
@@ -62,6 +62,6 @@ Default options are in `[]` after each option.
 
 #### Game
 
-Any property in the `server.properties` file can be changed with the `-property` argument. Just like the properties file, the argument also uses the `<KEY>=<VALUE>` syntax (e.g. `-property difficulty=hard`).
+Any property in the `server.properties` file can be changed with the `-p`|`--property` argument. Just like the properties file, the argument also uses the `<KEY>=<VALUE>` syntax (e.g. `--property difficulty=hard`).
 
 See the [Minecraft Wiki](https://minecraft.wiki/w/Server.properties#Default_content) for reference.

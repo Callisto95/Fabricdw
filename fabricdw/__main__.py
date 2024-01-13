@@ -28,13 +28,12 @@ def parse_args() -> Namespace:
 	parser.add_argument("-mn", "--min-ram", action="store", type=float, dest="min_ram", default=defaults.min_ram)
 	parser.add_argument("-mx", "--max-ram", action="store", type=float, dest="max_ram", default=defaults.max_ram)
 	
-	parser.add_argument("-p", "--port", action="store", type=int, dest="port", default=25565)
 	parser.add_argument("-b", "--backups", action="store", type=int, dest="backups", default=defaults.backups)
 	parser.add_argument("-i", "--idle-time", action="store", type=int, dest="idle_time", default=defaults.idle_time)
 	
 	parser.add_argument("--show-init-output", action="store_const", dest="init_output", default=subprocess.DEVNULL, const=None)
 	
-	parser.add_argument("-property", action="append", type=str, dest="properties", default=[])
+	parser.add_argument("-p", "--property", action="append", type=str, dest="properties", default=[])
 	
 	args: Namespace = parser.parse_args()
 	
