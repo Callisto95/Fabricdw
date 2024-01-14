@@ -49,10 +49,15 @@ Installing to the global and user directory is possible (via `pip install .` or 
 
 Default options are in `[]` after each option.
 
+#### Fabricdw itself
+
+- `--list` (instead of the installation name!): lists all installations and where they are
+- `-d`|`--directory`: path of the installation. [`<current directory>/<installation name>`]
+- `-c`|`--copy`: copies the given installation
+- `-r`|`--remove`: remove the installation (you're asked before any files are removed!)
+
 #### Server
 
-- `-d`|`--directory`: path of the installation. [`<current directory>/<installation name>`]
-- `-r`|`--remove`: remove the installation (you're asked before any files are removed)
 - `-u`|`--user`: the user running the server. [current user]
 - `-mn`|`--min-ram`: minimum amount of RAM the server can use (in GB). [`defaults.min_ram` or `0.5`]
 - `-mx`|`--max-ram`: maximum amount of RAM the server can use (in GB). [`defaults.max_ram` or `6`]
