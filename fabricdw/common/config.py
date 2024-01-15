@@ -108,7 +108,6 @@ class Config(DictSerialization):
 
 
 def _load_config() -> Config:
-	raw: dict = {}
 	if exists(CONFIG_FILE):
 		with open(CONFIG_FILE, 'r') as cfg:
 			raw = json.load(cfg)

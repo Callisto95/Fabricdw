@@ -100,10 +100,12 @@ def set_property_if_not_defined(args: Namespace, prop_name: str, fallback: str) 
 		args.properties[prop_name] = fallback
 
 
-def create_installation(active_installation: Installation, args: Namespace) -> str | None:
+def create_installation(args: Namespace) -> None:
+	active_installation: Installation = CONFIG.get_installation(args.name)
+	
 	if active_installation is not None:
 		print(f"{Fore.RED}installation '{active_installation.pretty_name(Fore.RED)}' already exists! ({active_installation.root}){Style.RESET_ALL}")
-		return None
+		return
 	
 	os.makedirs(args.output_dir, exist_ok=True)
 	active_dir: str = absolute_path(args.output_dir)
@@ -117,7 +119,9 @@ def create_installation(active_installation: Installation, args: Namespace) -> s
 		
 		print(f"installation '{Installation.pretty_name_str(args.name)}' created! ({active_dir})")
 		
-		return _dir
+		CONFIG.add_installation(args.name, _dir)
+		
+		return
 	except KeyboardInterrupt as kbe:
 		print("Keyboard interrupt: Cleaning up...")
 		remove_dir(active_dir)
@@ -200,40 +204,48 @@ def _copy_installation(args: Namespace, source_installation: Installation, desti
 			shutil.move(the_end, f"{destination}/{target_world_name}_the_end")
 	
 	if args.properties[Properties.PORT_SERVER] == port:
-		print(f"{Fore.YELLOW}The server port of {Installation.pretty_name_str(args.name, after=Fore.YELLOW)} is the same as {Installation.pretty_name_str(args.copy, after=Fore.YELLOW)}!{Style.RESET_ALL}")
+		print(f"{Fore.YELLOW}The server port of {Installation.pretty_name_str(args.name, after=Fore.YELLOW)} is the same as {Installation.pretty_name_str(args.new_name, after=Fore.YELLOW)}!{Style.RESET_ALL}")
 	
 	if args.properties[Properties.PORT_QUERY] == qport:
-		print(f"{Fore.YELLOW}The query port of {Installation.pretty_name_str(args.name, after=Fore.YELLOW)} is the same as {Installation.pretty_name_str(args.copy, after=Fore.YELLOW)}!{Style.RESET_ALL}")
+		print(f"{Fore.YELLOW}The query port of {Installation.pretty_name_str(args.name, after=Fore.YELLOW)} is the same as {Installation.pretty_name_str(args.new_name, after=Fore.YELLOW)}!{Style.RESET_ALL}")
 	
+	# this has to be switched
+	args.name = args.new_name
 	_dir = _create_installation(destination, args, init_server=False, filled_ok=True)
 	
 	return _dir
 
 
-def copy_installation(args: Namespace) -> str | None:
-	source_installation: Installation | None = CONFIG.get_installation(args.copy)
+def copy_installation(args: Namespace) -> None:
+	source_installation: Installation | None = CONFIG.get_installation(args.name)
+	
+	if source_installation is None:
+		print("No installation to copy!")
+		return
+	
 	destination: str = absolute_path(args.output_dir)
 	
 	os.makedirs(destination)
 	
 	if not okay_to_write_into(destination):
-		return None
+		return
 	
 	set_property_if_not_defined(args, Properties.WORLD_NAME, Defaults.WORLD_NAME)
 	set_property_if_not_defined(args, Properties.PORT_SERVER, Defaults.PORT_SERVER)
 	# keep the regular server port
 	set_property_if_not_defined(args, Properties.PORT_QUERY, args.properties[Properties.PORT_SERVER])
 	
-	if source_installation is None:
-		print("No installation to copy!")
-		return None
-	
 	try:
+		# _copy_installation has to switch args.name with args.new_name
+		# therefore temp variable names
+		source_name: str = args.name
+		new_name: str = args.new_name
+		
 		_dir = _copy_installation(args, source_installation, destination)
 		
-		print(f"Installation {Installation.pretty_name_str(args.copy)} copied to {Installation.pretty_name_str(args.name)} ({args.output_dir})")
+		print(f"Installation {Installation.pretty_name_str(source_name)} copied to {Installation.pretty_name_str(new_name)} ({_dir})")
 		
-		return _dir
+		CONFIG.add_installation(args.name, _dir)
 	except KeyboardInterrupt as kbe:
 		print("Keyboard interrupt! Cleaning up!")
 		remove_dir(args.output_dir)

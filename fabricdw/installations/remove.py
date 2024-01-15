@@ -1,11 +1,20 @@
 import os
+from argparse import Namespace
 
 from colorama import Fore, Style
 
-from fabricdw.common import yes_no_question, Installation, remove_dir
+from fabricdw.common import yes_no_question, Installation, remove_dir, CONFIG
 
 
-def remove_installation(active_installation: Installation | None, fallback_name: str) -> bool:
+def remove_installation(args: Namespace) -> None:
+	installation_name: str = args.name
+	active_installation: Installation = CONFIG.get_installation(installation_name)
+	
+	if _remove_installation(active_installation, installation_name):
+		CONFIG.remove_installation(active_installation)
+
+
+def _remove_installation(active_installation: Installation, fallback_name: str) -> bool:
 	if active_installation is None:
 		print(f"{Fore.RED}installation '{Installation.pretty_name_str(fallback_name, after=Fore.RED)}' does not exist!{Style.RESET_ALL}")
 		return False
