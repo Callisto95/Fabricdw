@@ -51,10 +51,9 @@ Default options are in `[]` after each option.
 
 #### Fabricdw itself
 
-- `--list` (instead of the installation name!): lists all installations and where they are
+- `{ list | create | remove }`: lists, creates, or removes an installation
+
 - `-d`|`--directory`: path of the installation. [`<current directory>/<installation name>`]
-- `-c`|`--copy`: copies the given installation
-- `-r`|`--remove`: remove the installation (you're asked before any files are removed!)
 
 #### Server
 
