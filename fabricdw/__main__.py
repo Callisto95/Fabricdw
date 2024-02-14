@@ -68,6 +68,8 @@ def parse_args() -> Namespace:
 	
 	copy_parser.add_argument("new_name", action="store", type=str, help="the new name of the installation")
 	
+	create_parser.add_argument("--absolute-paths", action="store_true", dest="absolute_paths", help="use absolute paths, instead of relying on pwd")
+	
 	args: Namespace = parser.parse_args()
 	
 	if hasattr(args, "properties"):

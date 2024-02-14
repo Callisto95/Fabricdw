@@ -153,14 +153,16 @@ def _create_installation(active_dir: str, args: Namespace, init_server: bool = T
 	world_name = args.properties[Properties.WORLD_NAME]
 	port = args.properties[Properties.PORT_SERVER]
 	
+	server_dir: str = active_dir if args.absolute_paths else "$(pwd)"
+	
 	with open(fabric_env_file, 'w') as launch_script_file:
 		launch_script_file.write(
 			f"""#!/bin/sh
 GAME_USER="{args.user}" \\
 IDLE_SERVER="{convert_bool(args.idle_time != 0)}" \\
-IDLE_IF_TIME="{1200 if args.idle_time == 0 else args.idle_time}" \\
-SERVER_ROOT="{active_dir}" \\
-BACKUP_DEST="{active_dir}/backup" \\
+IDLE_IF_TIME="{900 if args.idle_time == 0 else args.idle_time}" \\
+SERVER_ROOT="{server_dir}" \\
+BACKUP_DEST="{server_dir}/backup" \\
 BACKUP_PATHS="{world_name} {world_name}_nether {world_name}_the_end" \\
 KEEP_BACKUPS="{args.backups}" \\
 SESSION_NAME="{args.name}" \\
