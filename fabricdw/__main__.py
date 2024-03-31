@@ -43,6 +43,9 @@ def parse_args() -> Namespace:
 	create_parser.add_argument("-d", "--directory", action="store", type=str, default=None, dest="output_dir", help="the directory in which Fabricdw will work")
 	create_parser.add_argument("--absolute-paths", action="store_true", dest="absolute_paths", help="use absolute paths, instead of relying on pwd")
 	
+	create_parser.add_argument("--java", action="store", dest="java_executable", default="java", type=str, help="the java executable to use. defaults to the 'java' command")
+	create_parser.add_argument("--java-args", action="store", dest="java_args", default=[], type=str, help="arguments for the JRE")
+	
 	args: Namespace = parser.parse_args()
 	
 	if hasattr(args, "properties"):

@@ -18,7 +18,7 @@ from fabricdw.properties import modify_properties
 from fabricdw.properties.modify import get_properties
 
 SERVER_JAR_FILE: str = "fabric-server-launch.jar"
-LAUNCH_COMMAND: str = "java -Dlog4j2.formatMsgNoLookups=true -Xms{min_ram}M -Xmx{max_ram}M -jar ./fabric-server-launch.jar nogui"
+LAUNCH_COMMAND: str = "{java_executable}{java_args} -Dlog4j2.formatMsgNoLookups=true -Xms{min_ram}M -Xmx{max_ram}M -jar ./fabric-server-launch.jar nogui"
 FABRIC_ENV_FILE: str = "fabricdw"
 
 API_URL: str = "https://meta.fabricmc.net/v2"
@@ -128,6 +128,13 @@ def create_installation(args: Namespace) -> None:
 		raise kbe
 
 
+def format_java_args(args: str) -> str:
+	if len(args) == 0:
+		return ""
+	
+	return f" {args.replace(', ', ' ')}"
+
+
 def _create_installation(active_dir: str, args: Namespace, init_server: bool = True, filled_ok: bool = False) -> str | None:
 	if not filled_ok and not okay_to_write_into:
 		return None
@@ -149,7 +156,7 @@ def _create_installation(active_dir: str, args: Namespace, init_server: bool = T
 		print(f"{Fore.RED}{Style.BRIGHT}This should not actually start the server!{Style.RESET_ALL}")
 		subprocess.call(["java", "-jar", jar_file], cwd=active_dir, stdout=args.init_output)
 	
-	launch_command = LAUNCH_COMMAND.format(min_ram=int(args.min_ram * 1024), max_ram=int(args.max_ram * 1024))
+	launch_command = LAUNCH_COMMAND.format(java_executable=args.java_executable, java_args=format_java_args(args.java_args), min_ram=int(args.min_ram * 1024), max_ram=int(args.max_ram * 1024))
 	world_name = args.properties[Properties.WORLD_NAME]
 	port = args.properties[Properties.PORT_SERVER]
 	

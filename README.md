@@ -63,6 +63,9 @@ Default options are in `[]` after each option.
 - `-b`|`--backups`: the amount of backups to keep. [`defaults.backups` or `5`]
 - `-i`|`--idle-time`: the amount of seconds after which the server is counted as "idle". `0` to disable the server going idle. [`defaults.idle_time` or `0`]
 - `--show-init-output`: show the output of the initialization. [no output]
+- `--absolute-paths`: use absolute path when defining `SERVER_ROOT` and `BACKUP_DEST`. [`$(pwd)` command]
+- `--java`: change the java executable. [`java` in `PATH`]
+- `--java-args`: arguments for the JRE. Separated by commas (e.g. `-XX:+UseZGC,-XX:+ZGenerational`). [no arguments]
 
 #### Game
 
