@@ -23,8 +23,12 @@ def absolute_path(path: str) -> str:
 	return os.path.abspath(os.path.expanduser(path))
 
 
-def okay_to_write_into(_dir: str) -> bool:
-	if len(os.listdir(_dir)) > 0 and not yes_no_question(f"The directory '{_dir}' is not empty. Proceed anyway?"):
+def ask_okay_to_write_into(directory: str) -> bool:
+	if len(os.listdir(directory)) > 0 and not yes_no_question(f"The directory '{directory}' is not empty. Proceed anyway?"):
 		print("cancelling installation")
 		return False
 	return True
+
+
+def convert_bool(b: bool) -> str:
+	return "true" if b else "false"

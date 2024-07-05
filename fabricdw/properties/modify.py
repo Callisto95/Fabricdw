@@ -4,13 +4,17 @@ from colorama import Fore, Style
 
 
 def create_replacements(args: Namespace) -> dict[str, str]:
-	replacements: dict[str, str] = {}
+	replacements: dict[str, str] = { }
 	
 	for property_ in args.properties:
 		contents: list[str] = property_.split("=")
 		
 		if len(contents) != 2:
-			print(f"{Fore.RED}invalid property argument: '{property_}'!{Style.RESET_ALL}")
+			print(f"{Fore.YELLOW}invalid property argument: '{property_}'!{Style.RESET_ALL}")
+			continue
+		
+		if contents[0] in replacements:
+			print(f"{Fore.YELLOW}Duplicate property: '{contents[0]}' (value: '{contents[1]}')!{Style.RESET_ALL}")
 			continue
 		
 		replacements[contents[0]] = contents[1]
@@ -28,6 +32,8 @@ def read_file(file: str) -> list[str]:
 
 
 def split_line(line: str) -> tuple[str, str] | tuple[None, None]:
+	line: str = line.strip()
+	
 	if "=" not in line or line.startswith("#"):
 		return None, None
 	
@@ -37,7 +43,7 @@ def split_line(line: str) -> tuple[str, str] | tuple[None, None]:
 
 
 def modify_properties(active_dir: str, replacements: dict[str, str]) -> None:
-	print("modifying server.properties...")
+	print("modifying server.properties file...")
 	
 	properties_file: str = f"{active_dir}/server.properties"
 	lines: list[str] = read_file(properties_file)
@@ -45,30 +51,16 @@ def modify_properties(active_dir: str, replacements: dict[str, str]) -> None:
 	for index, line in enumerate(lines):
 		key, _ = split_line(line)
 		
-		if key not in replacements:
+		if key is None or key not in replacements:
 			continue
 		
 		lines[index] = f"{key}={replacements.pop(key)}"
 	
 	if len(replacements) != 0:
-		print(f"{Fore.YELLOW}some properties have not been used:{Style.RESET_ALL}")
+		print(f"{Fore.YELLOW}some properties have not been used:")
 		for key, value in replacements.items():
 			print(f"\t{key} ({value})")
+		print(Style.RESET_ALL, end="")
 	
 	with open(properties_file, "w") as properties:
 		properties.writelines([f"{line}\n" for line in lines])
-
-
-def get_properties(file: str, *properties) -> list[str | None]:
-	result: list = [None] * len(properties)
-	
-	lines: list[str] = read_file(file)
-	
-	for line in lines:
-		key, value = split_line(line)
-		
-		if key in properties:
-			index = properties.index(key)
-			result[index] = value
-	
-	return result
