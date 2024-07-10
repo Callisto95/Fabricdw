@@ -265,7 +265,7 @@ def parse_args() -> None:
 		args.properties = create_replacements(args)
 	
 	# if not given, use current dir + name
-	if hasattr(args, "output_dir") and args.output_dir is None:
+	if hasattr(args, "output_dir"):
 		args.output_dir = absolute_path(args.output_dir if args.output_dir is not None else f"./{args.name}")
 	
 	arguments = args
