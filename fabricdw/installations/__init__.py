@@ -1,2 +1,5 @@
+from fabricdw.installations.change import move_installation, rename_installation
+from fabricdw.installations.copy import copy_installation
 from fabricdw.installations.create import create_installation
-from fabricdw.installations.remove import remove_installation
+from fabricdw.installations.delete import delete_installation
+from fabricdw.installations.update import update_installation

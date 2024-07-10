@@ -1,17 +1,35 @@
+from __future__ import annotations
+
 import json
 from enum import StrEnum
+from typing import Any
 
 import requests
 from pick import pick
+from requests import Response
+
+from fabricdw.args import args
+from fabricdw.common import InvalidCombinationException, SERVER_JAR_FILE, VersionChoice
 
 API_URL: str = "https://meta.fabricmc.net/v2"
 BASE_URL: str = f"{API_URL}/versions"
 
 
-# no enum for bool, class used instead
-class VersionStability:
-	STABLE: bool = True
-	UNSTABLE: bool = False
+class StableVersionDict:
+	def __init__(self, data: dict[str, Any]):
+		self.version: str = data["version"]
+		self.stability: bool = data["stable"]
+		self.data: dict[str, Any] = data
+	
+	def __str__(self) -> str:
+		return f"{self.version} {self.stability} :: {self.data}"
+	
+	@classmethod
+	def simple(cls, version: str = None, stability: bool = None) -> StableVersionDict:
+		if version is None and stability is None:
+			raise ValueError("version and stabiliy cannot be None")
+		
+		return StableVersionDict({ "version": version, "stable": stability })
 
 
 class ApiUrls(StrEnum):
@@ -20,67 +38,92 @@ class ApiUrls(StrEnum):
 	INSTALLER: str = f"{BASE_URL}/installer"
 
 
-def filter_versions(versions: list[dict], type: bool) -> list[dict]:
-	filtered_versions = [version for version in versions if version['stable'] is type]
+def find_version(versions: list[StableVersionDict], version: str, stable: bool) -> StableVersionDict | None:
+	for v in versions:
+		if v.version == version and v.stability == stable:
+			return v
+	
+	return None
+
+
+def filter_versions(versions: list[StableVersionDict], stable: bool) -> list[StableVersionDict]:
+	filtered_versions = [version for version in versions if version.stability is stable]
 	
 	return filtered_versions
 
 
-def get_versions(type: ApiUrls) -> list[dict]:
-	versions = json.loads(requests.get(type).text)
+def get_versions(url: ApiUrls) -> list[StableVersionDict]:
+	versions = json.loads(requests.get(url).text)
 	
-	return versions
+	return [StableVersionDict(version) for version in versions]
 
 
-def build_server_jar_url(game: dict[str, str], loader: dict[str, str], installer: dict[str, str]) -> str:
-	return f"{BASE_URL}/loader/{game['version']}/{loader['version']}/{installer['version']}/server/jar"
+def build_server_jar_url(game: StableVersionDict, loader: StableVersionDict, installer: StableVersionDict) -> str:
+	return f"{BASE_URL}/loader/{game.version}/{loader.version}/{installer.version}/server/jar"
 
 
-def selection_from_user(game_versions: list[dict], loader_versions: list[dict], installer_versions: list[dict]) -> \
-	tuple[dict, dict, dict]:
-	# option is quite different from what is needed
-	_, game_index = pick([game['version'] for game in game_versions], "select game version", indicator=">")
-	_, loader_index = pick([loader['version'] for loader in loader_versions], "select loader version", indicator=">")
-	_, installer_index = pick(
-		[installer['version'] for installer in installer_versions], "select installer version", indicator=">"
-	)
-	
-	return game_versions[game_index], loader_versions[loader_index], installer_versions[installer_index]
+def evaluate_user_choice(version, versions: list[StableVersionDict], name: str) -> StableVersionDict:
+	if version == VersionChoice.ASK or version is None:
+		_, i = pick([v.version for v in versions], f"select {name} version", indicator=">")
+		v = versions[i]
+		print(f"Using {name} version {v.version}")
+		return v
+	elif version == VersionChoice.LATEST:
+		print(f"Using latest {name} version ({versions[0].version})")
+		return versions[0]
+	else:
+		print(f"Using given version for {name} ({version})")
+		return StableVersionDict.simple(version=version)
 
 
-def select_version() -> str:
-	print("getting latest versions...")
+def evaluate_versions() -> str:
+	"""evaluate given versions, ask user if necessary"""
+	print("Getting latest versions...")
 	
-	game_versions = get_versions(ApiUrls.GAME)
-	loader_versions = get_versions(ApiUrls.LOADER)
-	installer_versions = get_versions(ApiUrls.INSTALLER)
+	game_versions: list[StableVersionDict] = get_versions(ApiUrls.GAME)
+	loader_versions: list[StableVersionDict] = get_versions(ApiUrls.LOADER)
+	installer_versions: list[StableVersionDict] = get_versions(ApiUrls.INSTALLER)
 	
-	stable_game_versions = filter_versions(game_versions, VersionStability.STABLE)
-	stable_loader_versions = filter_versions(loader_versions, VersionStability.STABLE)
-	stable_installer_versions = filter_versions(installer_versions, VersionStability.STABLE)
+	if not args().allow_snapshots:
+		game_versions: list[StableVersionDict] = filter_versions(game_versions, True)
 	
-	unstable_game_versions = filter_versions(game_versions, VersionStability.UNSTABLE)
+	if not args().allow_unstable:
+		loader_versions: list[StableVersionDict] = filter_versions(loader_versions, True)
+		installer_versions: list[StableVersionDict] = filter_versions(installer_versions, True)
 	
-	# loader and installer are latest by default
-	# any 'unstable' loader or installer are out of date
-	latest_stable = stable_game_versions[0]['version']
-	latest_unstable = unstable_game_versions[0]['version']
-	
-	_, index = pick(
-		[f"latest ({latest_stable})", f"latest-unstable ({latest_unstable})", "custom"], "select version",
-		indicator=">"
-	)
-	
-	match index:
-		case 2:
-			game_version, loader_version, installer_version = selection_from_user(
-				game_versions, loader_versions, installer_versions
-			)
-		case 1:
-			game_version, loader_version, installer_version = unstable_game_versions[0], stable_loader_versions[0], \
-				stable_installer_versions[0]
-		case 0 | _:
-			game_version, loader_version, installer_version = stable_game_versions[0], stable_loader_versions[0], \
-				stable_installer_versions[0]
+	game_version = evaluate_user_choice(args().game_version, game_versions, "game")
+	loader_version = evaluate_user_choice(args().loader_version, loader_versions, "loader")
+	installer_version = evaluate_user_choice(args().installer_version, installer_versions, "installer")
 	
 	return build_server_jar_url(game_version, loader_version, installer_version)
+
+
+def download_server_jar(directory: str, server_url: str) -> str:
+	server_jar_response: Response = requests.get(server_url)
+	
+	if server_jar_response.status_code != 200:
+		raise InvalidCombinationException()
+	
+	server_jar_file: str = f"{directory}/{SERVER_JAR_FILE}"
+	
+	with open(server_jar_file, "wb") as jar:
+		jar.write(server_jar_response.content)
+	
+	return server_jar_file
+
+
+def select_and_download_version(installation_directory: str = None) -> str:
+	"""User selects version, download it
+
+	:param installation_directory the directory, where the server jar is placed
+
+	:returns: path of the downloaded jar file"""
+	
+	if not installation_directory:
+		installation_directory = args().output_dir
+	
+	server_url: str = evaluate_versions()
+	
+	server_jar_file = download_server_jar(installation_directory, server_url)
+	
+	return server_jar_file
