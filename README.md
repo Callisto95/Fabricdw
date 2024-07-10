@@ -58,7 +58,7 @@ Each mode has different arguments. Check them with `[mode] --help`.
 
 - `name`: name of the installation to create
 - `-d`|`--directory`: path of the installation. [`[current directory]/[installation name]`]
-- `-p`|`--property`: changes a property within the `server.properties` file [no changes]
+- `-p`|`--property`: changes a property within the `server.properties` file. See [Minecraft Wiki](https://minecraft.wiki/w/Server.properties#Default_content). [no changes]
 - `-u`|`--user`: the user running the server. [current user]
 - `-m`|`--min-ram`: minimum amount of RAM the server can use (in GB). [`defaults.min_ram` or `0.5`]
 - `-x`|`--max-ram`: maximum amount of RAM the server can use (in GB). [`defaults.max_ram` or `6`]
@@ -97,18 +97,19 @@ Each mode has different arguments. Check them with `[mode] --help`.
 
 ##### Update
 
-Inherits all options from `Create`.
+  Inherits all options from `Create`.
 
 - `--keep-backups`: do not delete backups, which are created during the update process. [remove backups]
+
+##### Import
+
+  Adds an already existing installation, which Fabricdw is not aware of.
+
+- `name`: name of the imported installation
+- `output_dir`: directory, of the already existing installation. [`[current directory]/[installation name]`]
 
 ##### List
 
 Always lists all installations and the server root.
 
 - `--verify`: verify the existence of the all installations, remove the non-existent ones from the saved list.
-
-#### Game
-
-Any property in the `server.properties` file can be changed with the `-p`|`--property` argument. Just like the properties file, the argument also uses the `<KEY>=<VALUE>` syntax (e.g. `--property difficulty=hard`).
-
-See the [Minecraft Wiki](https://minecraft.wiki/w/Server.properties#Default_content) for reference.
