@@ -1,8 +1,6 @@
 import getpass
 import subprocess
-import time
 from argparse import ArgumentParser, Namespace
-from os.path import exists
 
 from colorama import Fore, Style
 
@@ -61,7 +59,7 @@ def parse_args() -> None:
 	
 	from fabricdw.common import absolute_path, CONFIG, VersionChoice
 	from fabricdw.installations import (copy_installation, create_installation, delete_installation, move_installation,
-		update_installation, rename_installation)
+		update_installation, rename_installation, import_installation)
 	from fabricdw.properties import create_replacements
 	
 	root_parser = ArgumentParser()
@@ -73,6 +71,7 @@ def parse_args() -> None:
 	move_parser = subparser.add_parser("move", help="Moves an existing installation")
 	rename_parser = subparser.add_parser("rename", help="Renames an existing installation")
 	update_parser = subparser.add_parser("update", help="Updates the Fabric loader and installer of the installation")
+	import_parser = subparser.add_parser("import", help="Import an existing installation")
 	list_parser = subparser.add_parser("list", help="List all existing installations")
 	
 	# can be called with args.function()
@@ -83,9 +82,10 @@ def parse_args() -> None:
 	move_parser.set_defaults(function=move_installation)
 	rename_parser.set_defaults(function=rename_installation)
 	update_parser.set_defaults(function=update_installation)
+	import_parser.set_defaults(function=import_installation)
 	list_parser.set_defaults(function=list_all_installations)
 	
-	for parser in [create_parser, delete_parser, move_parser, update_parser]:
+	for parser in [create_parser, delete_parser, move_parser, update_parser, import_parser]:
 		parser.add_argument("name", action="store", type=str, help="Name of the installation")
 	
 	for parser in [copy_parser, rename_parser]:
@@ -233,13 +233,14 @@ def parse_args() -> None:
 	
 	# required instead of optional
 	# still defaults to current directory
-	move_parser.add_argument(
-		"output_dir",
-		action="store",
-		type=str,
-		default=None,
-		help="The directory to which the installation will be moved to"
-	)
+	for parser in [move_parser, import_parser]:
+		parser.add_argument(
+			"output_dir",
+			action="store",
+			type=str,
+			default=None,
+			help="The directory to which the installation will be moved to"
+		)
 	
 	update_parser.add_argument(
 		"--keep-backups", action="store_true", dest="keep_backups", help="If the created backups should be kept"
@@ -253,10 +254,7 @@ def parse_args() -> None:
 	)
 	
 	list_parser.add_argument(
-		"--verify",
-		action="store_true",
-		dest="verify",
-		help="verifies the existence all installtions"
+		"--verify", action="store_true", dest="verify", help="verifies the existence all installtions"
 	)
 	
 	args = root_parser.parse_args()
