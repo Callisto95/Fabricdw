@@ -20,7 +20,7 @@ def update_installation() -> None:
 	server_jar_backup: str = f"{server_jar}-bak"
 	server_properties_backup: str = f"{server_properties}-bak"
 	fabricdw_backup: str = f"{fabricdw}-bak"
-	eula_backup: str = f"{eula}-original"
+	eula_backup: str = f"{eula}-bak"
 	
 	originals_and_backup: list[tuple[str, str]] = list(
 		zip(
