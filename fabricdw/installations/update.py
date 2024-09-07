@@ -52,7 +52,7 @@ def update_installation() -> None:
 		if args().keep_backups:
 			print("Keeping backup files")
 		else:
-			for file in [server_jar_backup, fabricdw_backup, eula_backup]:
+			for file in [server_jar_backup, fabricdw_backup	]:
 				os.remove(file)
 			print("Deleted backup files")
 	except Exception as err:
