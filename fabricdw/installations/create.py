@@ -83,6 +83,9 @@ def create_fabricdw_script(installation_directory: str = None) -> None:
 		Properties.PORT_SERVER] if Properties.PORT_SERVER in args().properties else Defaults.PORT_SERVER
 	
 	with open(fabric_env_file, 'w') as launch_script_file:
+		# Note:
+		# BACKUP_PATHS is multiple folders. New versions do not use multiple world directories.
+		# This is fine. tar handles this.		
 		launch_script_file.write(
 			f"""#!/bin/sh
 
