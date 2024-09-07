@@ -56,7 +56,7 @@ def update_installation() -> None:
 				os.remove(file)
 			print("Deleted backup files")
 	except Exception as err:
-		print(f"An error occurred ({err})! Undoing updat		e...")
+		print(f"An error occurred ({err})! Undoing update...")
 	finally:
 		for original, backup in originals_and_backup:
 			if exists(backup):

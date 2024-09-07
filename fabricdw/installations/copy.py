@@ -29,8 +29,8 @@ def copy_installation() -> None:
 		)
 		
 		print(
-			f"Remember to change ports and the world name in the 'server.properties' {Fore.YELLOW}AND{Style.RESET_ALL} "
-			f"in the 'fabricdw' file!"
+			f"Remember to change ports and the world name in the 'server.properties' {Fore.YELLOW}AND"
+			f"{Style.RESET_ALL} in the 'fabricdw' file!"
 		)
 	except KeyboardInterrupt:
 		if remove_dir(target_directory):

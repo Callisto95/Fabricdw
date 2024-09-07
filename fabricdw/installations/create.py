@@ -5,8 +5,8 @@ import subprocess
 from colorama import Fore, Style
 
 from fabricdw.args import args
-from fabricdw.common import ask_okay_to_write_into, CONFIG, convert_bool_to_str, FABRICD_ENV_FILE, Installation, remove_dir, \
-	SERVER_JAR_FILE
+from fabricdw.common import (ask_okay_to_write_into, CONFIG, convert_bool_to_str, FABRICD_ENV_FILE, Installation,
+	remove_dir, SERVER_JAR_FILE)
 from fabricdw.common.properties import Defaults, Properties
 from fabricdw.installations.fabric import select_and_download_version
 from fabricdw.properties import modify_properties
@@ -85,7 +85,7 @@ def create_fabricdw_script(installation_directory: str = None) -> None:
 	with open(fabric_env_file, 'w') as launch_script_file:
 		# Note:
 		# BACKUP_PATHS is multiple folders. New versions do not use multiple world directories.
-		# This is fine. tar handles this.		
+		# This is fine. tar handles this.
 		launch_script_file.write(
 			f"""#!/bin/sh
 

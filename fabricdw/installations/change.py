@@ -1,8 +1,7 @@
 import os
-import shutil
 
 from fabricdw.args import args
-from fabricdw.common import ask_okay_to_write_into, CONFIG, Installation, remove_dir
+from fabricdw.common import ask_okay_to_write_into, Installation, remove_dir
 
 
 def move_installation() -> None:

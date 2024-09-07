@@ -13,4 +13,4 @@ def import_installation() -> None:
 		print(f"Invalid path ({target_directory})")
 		return
 	
-	CONFIG.create_new_installation(args().name, target_directory	)
+	CONFIG.create_new_installation(args().name, target_directory)

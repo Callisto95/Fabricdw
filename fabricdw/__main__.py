@@ -1,5 +1,5 @@
+from fabricdw.args import args, parse_args
 from fabricdw.common import InstallationAlreadyExistError, InstallationDoesNotExistError, write_config
-from fabricdw.args import parse_args, args
 
 
 def main() -> None:

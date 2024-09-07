@@ -1,5 +1,3 @@
-from os.path import exists, isdir
-
 from fabricdw.args import args
 from fabricdw.common import CONFIG, Installation, remove_dir, yes_no_question
 
