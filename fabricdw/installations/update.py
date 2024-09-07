@@ -2,9 +2,8 @@ import os
 from os.path import exists
 
 from fabricdw.args import args
-from fabricdw.common import (convert_bool_to_str, convert_str_to_bool, EULA_FILE, FABRICD_ENV_FILE, Installation,
-	SERVER_JAR_FILE, SERVER_PROPERTIES_FILE)
-from fabricdw.installations.create import initialize_server, create_fabricdw_script
+from fabricdw.common import (EULA_FILE, FABRICD_ENV_FILE, Installation, SERVER_JAR_FILE, SERVER_PROPERTIES_FILE)
+from fabricdw.installations.create import create_fabricdw_script, initialize_server
 from fabricdw.installations.fabric import select_and_download_version
 from fabricdw.properties import modify_properties
 
@@ -23,12 +22,15 @@ def update_installation() -> None:
 	fabricdw_backup: str = f"{fabricdw}-bak"
 	eula_backup: str = f"{eula}-original"
 	
-	originals_and_backup: list[tuple[str, str]] = list(zip(
-		[server_jar, server_properties, fabricdw, eula],
-		[server_jar_backup, server_properties_backup, fabricdw_backup, eula_backup]
-	))
+	originals_and_backup: list[tuple[str, str]] = list(
+		zip(
+			[server_jar, server_properties, fabricdw, eula],
+			[server_jar_backup, server_properties_backup, fabricdw_backup, eula_backup]
+		)
+	)
 	
 	try:
+		# essentially, make a clean server (no configs)
 		for original, backup in originals_and_backup:
 			os.replace(original, backup)
 		
@@ -36,6 +38,8 @@ def update_installation() -> None:
 		
 		initialize_server()
 		
+		# use pre-existing server properties
+		os.replace(server_properties_backup, server_properties)
 		modify_properties()
 		
 		create_fabricdw_script()
@@ -48,12 +52,12 @@ def update_installation() -> None:
 		if args().keep_backups:
 			print("Keeping backup files")
 		else:
-			for file in [server_jar_backup, server_properties_backup, fabricdw_backup]:
+			for file in [server_jar_backup, fabricdw_backup, eula_backup]:
 				os.remove(file)
 			print("Deleted backup files")
 	except Exception as err:
-		print(f"An error occurred ({err})! Undoing update...")
-		
+		print(f"An error occurred ({err})! Undoing updat		e...")
+	finally:
 		for original, backup in originals_and_backup:
 			if exists(backup):
 				os.replace(backup, original)
