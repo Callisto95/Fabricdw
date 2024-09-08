@@ -92,78 +92,88 @@ def parse_args() -> None:
 		parser.add_argument("source", action="store", type=str, help="Name of the source installation")
 		parser.add_argument("target", action="store", type=str, help="Name of the target installation")
 	
+	create_parser.add_argument(
+		"-p",
+		"--property",
+		action="append",
+		type=str,
+		dest="properties",
+		default=[],
+		help="changes the default properties in server.properties"
+	)
+	
+	# general server properties
+	create_parser.add_argument(
+		"-u",
+		"--user",
+		action="store",
+		type=str,
+		dest="user",
+		default=getpass.getuser(),
+		help="The user, who starts the server"
+	)
+	create_parser.add_argument(
+		"-m",
+		"--min-ram",
+		action="store",
+		type=float,
+		dest="min_ram",
+		default=CONFIG.defaults.min_ram,
+		help="Minimum amount of RAM the server can use"
+	)
+	create_parser.add_argument(
+		"-x",
+		"--max-ram",
+		action="store",
+		type=float,
+		dest="max_ram",
+		default=CONFIG.defaults.max_ram,
+		help="Maximum amount of RAM the server can use"
+	)
+	create_parser.add_argument(
+		"-k",
+		"--backups",
+		action="store",
+		type=int,
+		dest="backups",
+		default=CONFIG.defaults.backups,
+		help="The amount of backups which will be kept"
+	)
+	create_parser.add_argument(
+		"-t",
+		"--idle-time",
+		action="store",
+		type=int,
+		dest="idle_time",
+		default=CONFIG.defaults.idle_time,
+		help="The time after which the server will turn idle"
+	)
+	create_parser.add_argument(
+		"--show-init-output",
+		action="store_const",
+		dest="init_output",
+		default=subprocess.DEVNULL,
+		const=None,
+		help="Show the output when the server initializes"
+	)
+	# java properties
+	create_parser.add_argument(
+		"--java",
+		action="store",
+		type=str,
+		help="The java executable to use. Defaults to the 'java' command"
+	)
+	create_parser.add_argument(
+		"--java-args", action="store", dest="java_args", default=[], type=str, help="Arguments for the JRE"
+	)
+	create_parser.add_argument(
+		"--allow-non-empty",
+		action="store_true",
+		dest="allow_non_empty",
+		help="Allows the target directory to be not empty"
+	)
+	
 	for parser in [create_parser, update_parser]:
-		parser.add_argument(
-			"-p",
-			"--property",
-			action="append",
-			type=str,
-			dest="properties",
-			default=[],
-			help="changes the default properties in server.properties"
-		)
-		
-		# general server properties
-		parser.add_argument(
-			"-u",
-			"--user",
-			action="store",
-			type=str,
-			dest="user",
-			default=getpass.getuser(),
-			help="The user, who starts the server"
-		)
-		parser.add_argument(
-			"-m",
-			"--min-ram",
-			action="store",
-			type=float,
-			dest="min_ram",
-			default=CONFIG.defaults.min_ram,
-			help="Minimum amount of RAM the server can use"
-		)
-		parser.add_argument(
-			"-x",
-			"--max-ram",
-			action="store",
-			type=float,
-			dest="max_ram",
-			default=CONFIG.defaults.max_ram,
-			help="Maximum amount of RAM the server can use"
-		)
-		parser.add_argument(
-			"-k",
-			"--backups",
-			action="store",
-			type=int,
-			dest="backups",
-			default=CONFIG.defaults.backups,
-			help="The amount of backups which will be kept"
-		)
-		parser.add_argument(
-			"-t",
-			"--idle-time",
-			action="store",
-			type=int,
-			dest="idle_time",
-			default=CONFIG.defaults.idle_time,
-			help="The time after which the server will turn idle"
-		)
-		parser.add_argument(
-			"--show-init-output",
-			action="store_const",
-			dest="init_output",
-			default=subprocess.DEVNULL,
-			const=None,
-			help="Show the output when the server initializes"
-		)
-		
-		parser.add_argument(
-			"--allow-non-empty",
-			action="store_true",
-			dest="allow_non_empty",
-			help="Allows the target directory to be not empty"
-		)
 		parser.add_argument(
 			"--allow-snapshots",
 			action="store_true",
@@ -178,7 +188,6 @@ def parse_args() -> None:
 				 "'--loader-version ask' and '--installer-version ask'."
 		)
 		
-		# it is best to use the latest fabric version
 		parser.add_argument(
 			"-g",
 			"--game-version",
@@ -186,7 +195,7 @@ def parse_args() -> None:
 			dest="game_version",
 			default=VersionChoice.ASK,
 			type=str,
-			help="Which version of Minecraft to use. Either 'ask', 'latest', or an actual version	"
+			help="Which version of Minecraft to use. Either 'ask', 'latest', or an actual version"
 		)
 		parser.add_argument(
 			"-l",
@@ -205,19 +214,6 @@ def parse_args() -> None:
 			default=VersionChoice.LATEST,
 			type=str,
 			help="Which version of Fabric installer to use. Either 'ask', 'latest', or an actual version"
-		)
-		
-		# java properties
-		parser.add_argument(
-			"--java",
-			action="store",
-			dest="java_executable",
-			default="java",
-			type=str,
-			help="The java executable to use. Defaults to the 'java' command"
-		)
-		parser.add_argument(
-			"--java-args", action="store", dest="java_args", default=[], type=str, help="Arguments for the JRE"
 		)
 	
 	for parser in [create_parser, copy_parser]:
@@ -243,7 +239,7 @@ def parse_args() -> None:
 		)
 	
 	update_parser.add_argument(
-		"--keep-backups", action="store_true", dest="keep_backups", help="If the created backups should be kept"
+		"--keep-backup", action="store_true", dest="keep_backups", help="If the created server jar backup should be kept"
 	)
 	
 	delete_parser.add_argument(
