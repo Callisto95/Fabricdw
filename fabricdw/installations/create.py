@@ -52,7 +52,7 @@ def format_java_args(arguments: str) -> str:
 	if len(arguments) == 0:
 		return ""
 	
-	return f"{arguments.replace(',', ' ')}"
+	return f"-{arguments.replace(',', ' -')}"
 
 
 def initialize_server(installation_directory: str = None) -> None:

@@ -169,9 +169,9 @@ def parse_args() -> None:
 		"--java-args",
 		action="store",
 		dest="java_args",
-		default=[],
+		default="",
 		type=str,
-		help="Comma separated list of arguments for the JRE"
+		help="Comma separated list of arguments for the JRE. The initial dash is added later, DO NOT INCLUDE IT."
 	)
 	create_parser.add_argument(
 		"--allow-non-empty",
