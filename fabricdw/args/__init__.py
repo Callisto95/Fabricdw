@@ -161,10 +161,17 @@ def parse_args() -> None:
 		"--java",
 		action="store",
 		type=str,
-		help="The java executable to use. Defaults to the 'java' command"
+		help="The java executable to use. Defaults to the 'java' command",
+		default="java",
+		dest="java_executable"
 	)
 	create_parser.add_argument(
-		"--java-args", action="store", dest="java_args", default=[], type=str, help="Arguments for the JRE"
+		"--java-args",
+		action="store",
+		dest="java_args",
+		default=[],
+		type=str,
+		help="Comma separated list of arguments for the JRE"
 	)
 	create_parser.add_argument(
 		"--allow-non-empty",
@@ -239,7 +246,10 @@ def parse_args() -> None:
 		)
 	
 	update_parser.add_argument(
-		"--keep-backup", action="store_true", dest="keep_backups", help="If the created server jar backup should be kept"
+		"--keep-backup",
+		action="store_true",
+		dest="keep_backups",
+		help="If the created server jar backup should be kept"
 	)
 	
 	delete_parser.add_argument(
