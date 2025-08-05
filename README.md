@@ -14,20 +14,29 @@ This is a python script which allows you to easily create multiple Minecraft Fab
 
 ## Installation
 
-To install Fabricdw properly, use Poetry.
+```shell
+pip install -r requirements.txt
+```
+
+If your pip is system wide, this may cause issues regarding `externally-managed-environment`.
+
+You can either use a virtual environment instead or install them via pacman / the AUR.
+
+Here is the venv approach:
 
 ```shell
-poetry install
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
+
+If a venv is used, replace the generic `python` with `[INSTALLATION_DIRECTORY]/venv/bin/python` in the next commands.
 
 ## Running Fabricdw
 
 ```shell
-# activate a virtual environment
-# this must be in the installation directory of Fabricdw
-poetry shell
 # this can now be anywhere
-python -m fabricdw
+PYTHONPATH=[INSTALLATION_DIRECTORY] python -m fabricdw
 ```
 
 A more advanced approach would be this function (in your shell's rc file):
@@ -37,7 +46,7 @@ fabricdw() {
         if [[ -f "fabricdw" ]]; then
                 ./fabricdw $*
         else
-                poetry run --directory [INSTALLATION_DIR] python -m fabricdw $*
+                PYTHONPATH=[INSTALLATION_DIRECTORY] python -m fabricdw $*
         fi
 }
 ```

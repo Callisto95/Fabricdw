@@ -51,7 +51,7 @@ def modify_properties(installation_directory: str = None, replacements: dict[str
 	if not installation_directory:
 		installation_directory = args().output_dir
 	if not replacements:
-		replacements = args().properties
+		replacements = args().properties.copy()
 	
 	properties_file: str = f"{installation_directory}/{SERVER_PROPERTIES_FILE}"
 	lines: list[str] = read_file(properties_file)

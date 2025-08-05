@@ -9,7 +9,7 @@ from fabricdw.common import (ask_okay_to_write_into, CONFIG, convert_bool_to_str
 	remove_dir, SERVER_JAR_FILE)
 from fabricdw.common.properties import Defaults, Properties
 from fabricdw.installations.fabric import select_and_download_version
-from fabricdw.properties import modify_properties
+from fabricdw.properties import get_property, modify_properties
 
 LAUNCH_COMMAND: str = ("{java_executable} {java_args} -Dlog4j2.formatMsgNoLookups=true -Xms{min_ram}M -Xmx{max_ram}M "
 					   "-jar ./fabric-server-launch.jar nogui")
@@ -77,10 +77,8 @@ def create_fabricdw_script(installation_directory: str = None) -> None:
 		max_ram=int(args().max_ram * 1024)
 	)
 	
-	world_name = args().properties[
-		Properties.WORLD_NAME] if Properties.WORLD_NAME in args().properties else Defaults.WORLD_NAME
-	port = args().properties[
-		Properties.PORT_SERVER] if Properties.PORT_SERVER in args().properties else Defaults.PORT_SERVER
+	world_name: str = get_property(Properties.WORLD_NAME, Defaults.WORLD_NAME)
+	port: str = get_property(Properties.PORT_SERVER, Defaults.PORT_SERVER)
 	
 	with open(fabric_env_file, 'w') as launch_script_file:
 		# Note:
