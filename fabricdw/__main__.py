@@ -8,6 +8,9 @@ def main() -> None:
 	try:
 		args().function()
 	except (InstallationAlreadyExistError, InstallationDoesNotExistError) as error:
+		print(f"Error during processing: {error}")
+		print()
+		print("Exact cause:")
 		print(error)
 	
 	write_config()

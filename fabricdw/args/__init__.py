@@ -260,7 +260,7 @@ def parse_args() -> None:
 	)
 	
 	list_parser.add_argument(
-		"--verify", action="store_true", dest="verify", help="verifies the existence all installtions"
+		"--verify", action="store_true", dest="verify", help="verifies the existence all installations"
 	)
 	
 	args = root_parser.parse_args()
