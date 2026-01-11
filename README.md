@@ -8,9 +8,8 @@ This is a python script which allows you to easily create multiple Minecraft Fab
 
 `fabricdw` requires `fabricd`, which is the [minecraft-server](https://github.com/Edenhofer/minecraft-server/) script installed with `GAME=fabric` and `INAME=fabricd` (as far as I can tell).
 
-## Note for `fabricd`
-
-`fabricd`, also comes with the AUR package [fabric-server](https://aur.archlinux.org/packages/fabric-server).
+> [!NOTE]
+> Some Linux distros use `python3` instead of `python`
 
 ## Installation
 
@@ -18,7 +17,7 @@ This is a python script which allows you to easily create multiple Minecraft Fab
 pip install -r requirements.txt
 ```
 
-If your pip is system wide, this may cause issues regarding `externally-managed-environment`.
+If your pip is system-wide, this may cause issues regarding `externally-managed-environment`.
 
 You can either use a virtual environment instead or install them via pacman / the AUR.
 
@@ -46,7 +45,7 @@ fabricdw() {
         if [[ -f "fabricdw" ]]; then
                 ./fabricdw $*
         else
-                PYTHONPATH=[INSTALLATION_DIRECTORY] python -m fabricdw $*
+                PYTHONPATH=[INSTALLATION_DIRECTORY] [INSTALLATION_DIRECTORY]/venv/bin/python -m fabricdw $*
         fi
 }
 ```
@@ -72,14 +71,14 @@ Each mode has different arguments. Check them with `[mode] --help`.
 - `-m`|`--min-ram`: minimum amount of RAM the server can use (in GB). [`defaults.min_ram` or `0.5`]
 - `-x`|`--max-ram`: maximum amount of RAM the server can use (in GB). [`defaults.max_ram` or `6`]
 - `-b`|`--backups`: the amount of backups to keep. [`defaults.backups` or `5`]
-- `-i`|`--idle-time`: the amount of seconds after which the server is counted as "idle". `0` to disable the server going idle. [`defaults.idle_time` or `0`]
+- `-t`|`--idle-time`: the amount of seconds after which the server is counted as "idle". `0` to disable the server going idle. [`defaults.idle_time` or `0`]
 - `--show-init-output`: show the output of the initialization. [no output]
 - `--allow-non-empty`: skips the question, whether the target directory can be empty. [ask]
 - `--allow-snapshots`: show snapshot game versions in selection. Does not influence `--game-version [version]`, but affects `--game-version latest`. [only releases]
 - `--allow-unstable`: show unstable loader and installer versions in selection. Does not influence `--{loader,installer}-version [version]`, but affects `--{loader,installer}-version latest`. [only stable]
-- `--game-version`: can be `ask`, `latest`, or an actual version. [`ask`]
-- `--loader-version`: can be `ask`, `latest`, or an actual fabric loader version. [`latest`]
-- `--fabric-version`: can be `ask`, `latest`, or an actual fabric installer version. [`latest`]
+- `-g`|`--game-version`: can be `ask`, `latest`, or an actual version. [`ask`]
+- `-l`|`--loader-version`: can be `ask`, `latest`, or an actual fabric loader version. [`latest`]
+- `-i`|`--installer-version`: can be `ask`, `latest`, or an actual fabric installer version. [`latest`]
 - `--java`: change the java executable. [`java` in `PATH`]
 - `--java-args`: arguments for the JRE. Separated by commas (e.g. `-XX:+UseZGC,-XX:+ZGenerational`). [no arguments]
 

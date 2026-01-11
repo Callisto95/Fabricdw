@@ -272,7 +272,12 @@ def parse_args() -> None:
 	
 	# if not given, use current dir + name
 	if hasattr(args, "output_dir"):
-		args.output_dir = absolute_path(args.output_dir if args.output_dir is not None else f"./{args.name}")
+		if hasattr(args, "name"):
+			target: str = args.name
+		else:
+			target: str = args.target
+		
+		args.output_dir = absolute_path(target)
 	
 	arguments = args
 
